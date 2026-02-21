@@ -16,6 +16,7 @@
 #include <linux/err.h>
 #include <linux/device.h>
 #include <linux/err.h>
+#include <linux/version.h>
 
 dev_t dev = 0;
 static struct class *dev_class;
@@ -33,7 +34,12 @@ static int __init hello_world_init(void)
         pr_info("Major = %d Minor = %d \n",MAJOR(dev), MINOR(dev));
  
         /*Creating struct class*/
-        dev_class = class_create(THIS_MODULE,"etx_class");
+        #if LINUX_VERSION_CODE >= KERNEL_VERSION(6,4,0)
+          dev_class = class_create("etx_class");
+	#else
+          dev_class = class_create(THIS_MODULE,"etx_class");
+        #endif
+
         if(IS_ERR(dev_class)){
             pr_err("Cannot create the struct class for device\n");
             goto r_class;

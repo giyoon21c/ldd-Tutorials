@@ -20,7 +20,7 @@ module_param(nameETX, charp, S_IRUSR|S_IWUSR);                     //String
 module_param_array(arr_valueETX, int, NULL, S_IRUSR|S_IWUSR);      //Array of integers
  
 /*----------------------Module_param_cb()--------------------------------*/
-int notify_param(const char *val, const struct kernel_param *kp)
+int notify_param_change(const char *val, const struct kernel_param *kp)
 {
         int res = param_set_int(val, kp); // Use helper for write variable
         if(res==0) {
@@ -33,11 +33,12 @@ int notify_param(const char *val, const struct kernel_param *kp)
  
 const struct kernel_param_ops my_param_ops = 
 {
-        .set = &notify_param, // Use our setter ...
+        .set = &notify_param_change, // Use our setter ...
         .get = &param_get_int, // .. and standard getter
 };
  
 module_param_cb(cb_valueETX, &my_param_ops, &cb_valueETX, S_IRUGO|S_IWUSR );
+
 /*-------------------------------------------------------------------------*/
 
 /*
