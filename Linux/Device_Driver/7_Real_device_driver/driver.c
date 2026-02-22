@@ -117,7 +117,8 @@ static int __init etx_driver_init(void)
         }
  
         /*Creating struct class*/
-        if(IS_ERR(dev_class = class_create(THIS_MODULE,"etx_class"))){
+        //if(IS_ERR(dev_class = class_create(THIS_MODULE,"etx_class"))){
+        if(IS_ERR(dev_class = class_create("etx_class"))){
             pr_info("Cannot create the struct class\n");
             goto r_class;
         }
