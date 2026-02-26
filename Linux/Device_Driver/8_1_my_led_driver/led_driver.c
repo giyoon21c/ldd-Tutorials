@@ -57,10 +57,11 @@ static struct file_operations fops = {
 };
 
 
+static struct gpio_desc *led_desc;
+
 // --- Init & Exit ---
 
 static int __init led_init(void) {
-
 
   int ret;
 
@@ -73,7 +74,7 @@ static int __init led_init(void) {
   if ((ret = cdev_add(&led_cdev, dev_num, 1)) < 0) goto fail_cdev;
 
   // 3. Create class 
-  led_class = class_create("led_class");
+  led_class = class_create("led_class"); // was failing
   if (IS_ERR(led_class)) {
     ret = PTR_ERR(led_class);
     goto fail_class;
@@ -85,20 +86,25 @@ static int __init led_init(void) {
   }
 
   // 5. Request GPIO (The part that caused your "No such device" error)
-  led_desc = gpio_to_desc(GPIO_PIN);
+  led_desc = gpio_to_desc(23);
   if (!led_desc) {
-    ret = -ENODEV;
-    goto fail_gpio;
+    pr_err("LED Driver: Failed to get descriptor for 23. Is it busy?\n");
+    return -ENODEV;
   }
-  gpiod_direction_output(led_desc, 0);
+
+  // "Request" the GPIO to ensure the kernel marks it as OURS
+  if (gpiod_direction_output(led_desc, 0)) {
+    pr_err("LED Driver: Could not claim GPIO 23 as output\n");
+    return -EBUSY; // Pin is busy!
+  }
 
   return 0; // Success!
 
 // --- ROLLBACK LABELS ---
-fail_gpio:
-    device_destroy(led_class, dev_num);
-fail_device:
-    class_destroy(led_class); // This cleans up the duplicate filename issue!
+//fail_gpio:
+//    device_destroy(led_class, dev_num);
+//fail_device:
+//    class_destroy(led_class); // This cleans up the duplicate filename issue!
 fail_class:
     cdev_del(&led_cdev);
 fail_cdev:
