@@ -1,7 +1,6 @@
 import RPi.GPIO as GPIO         # Import Raspberry Pi GPIO library
 from time import sleep          # Import the sleep function 
 
-#pinLED = 4                      # LED GPIO Pin LED
 pinLED = 23                      # LED GPIO Pin LED
 
 GPIO.setmode(GPIO.BCM)          # Use GPIO pin number
